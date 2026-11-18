@@ -1,184 +1,173 @@
-# Nimbus_Project
-#include <stdio.h>
-#include <string.h>
+🏥 Hospital Pharmacy Stock System (C)
 
-#define MAX_DRUGS 100
+A fast, lightweight, console-based inventory management system written in C. Designed for hospital pharmacies, this application tracks medication stock, monitors expiration dates, and enables real-time restocking using C structures and pointer arithmetic.
 
-// Structure to store Drug Details
+📋 Table of Contents
+
+Features
+
+Core C Concepts Demonstrated
+
+Data Structure
+
+Getting Started
+
+Usage & Sample Output
+
+Input Guidelines & Limitations
+
+Roadmap & Future Enhancements
+
+✨ Features
+
+Add New Medications: Register up to 100 unique drugs (MAX_DRUGS) with an ID, name, expiration date, unit price, and initial stock count.
+
+Tabular Inventory View: Displays all registered medications in an aligned, easy-to-read CLI table.
+
+Automated Expiry Alerts: Scans the entire inventory against the system's reference date (2026-10-27) and flags expired medications for immediate shelf removal.
+
+Real-Time Dynamic Restocking: Look up any medication by its unique Drug ID and increment stock levels directly in memory via pointers.
+
+Input & Boundary Validation: Guards against array overflow, negative/zero restock quantities, empty inventories, and invalid menu selections.
+
+🧠 Core C Concepts Demonstrated
+
+This project serves as a clean, practical reference for fundamental and intermediate C programming techniques:
+
+Concept
+
+Implementation in Project
+
+Structures (struct)
+
+Encapsulates heterogeneous drug attributes (int, char[], float) into a cohesive struct Drug data type.
+
+Pointer Arithmetic
+
+Traverses arrays using offset notation ((drugs + i)->member) rather than standard array indexing.
+
+Pass-by-Reference
+
+Passes &drugCount to addDrug() and direct struct pointers to restockDrug() for in-place memory updates.
+
+const Correctness
+
+Protects read-only operations (displayInventory() and checkExpiry()) using const struct Drug * parameters.
+
+Modular Design
+
+Separates program logic into clean, single-responsibility functions with explicit prototypes.
+
+🗂️ Data Structure
+
+Each medication record is represented by the following structure:
+
 struct Drug {
-    int id;
-    char name[50];
-    int expYear;
-    int expMonth;
-    int expDay;
-    float price;
-    int stock;
+    int id;          // Unique numeric identifier
+    char name[50];   // Medication name (up to 49 characters)
+    int expYear;     // Expiration year (YYYY)
+    int expMonth;    // Expiration month (MM)
+    int expDay;      // Expiration day (DD)
+    float price;     // Unit price in USD ($)
+    int stock;       // Available quantity in inventory
 };
 
-// Function prototypes
-void addDrug(struct Drug *drugs, int *count);
-void displayInventory(const struct Drug *drugs, int count);
-void checkExpiry(const struct Drug *drugs, int count, int curYear, int curMonth, int curDay);
-void restockDrug(struct Drug *drugs, int count);
 
-int main() {
-    struct Drug inventory[MAX_DRUGS];
-    int drugCount = 0;
-    int choice;
+🚀 Getting Started
 
-    // Simulated Current Date for Expiry Check (e.g., October 27, 2026)
-    int currentYear = 2026;
-    int currentMonth = 10;
-    int currentDay = 27;
+Prerequisites
 
-    do {
-        printf("\n=========================================\n");
-        printf("    HOSPITAL PHARMACY STOCK SYSTEM       \n");
-        printf("=========================================\n");
-        printf("1. Add New Drug\n");
-        printf("2. Display All Inventory\n");
-        printf("3. Check for Expired Products\n");
-        printf("4. Restock Drug (Dynamic Update)\n");
-        printf("5. Exit\n");
-        printf("Enter your choice: ");
-        scanf("%d", &choice);
+Ensure you have a standard C compiler installed on your machine:
 
-        switch (choice) {
-            case 1:
-                addDrug(inventory, &drugCount);
-                break;
-            case 2:
-                displayInventory(inventory, drugCount);
-                break;
-            case 3:
-                checkExpiry(inventory, drugCount, currentYear, currentMonth, currentDay);
-                break;
-            case 4:
-                restockDrug(inventory, drugCount);
-                break;
-            case 5:
-                printf("\nExiting system. Stay safe!\n");
-                break;
-            default:
-                printf("\nInvalid choice! Please try again.\n");
-        }
-    } while (choice != 5);
+GCC (gcc --version)
 
-    return 0;
-}
+Clang (clang --version)
 
-// Function to add a new drug using pointers
-void addDrug(struct Drug *drugs, int *count) {
-    if (*count >= MAX_DRUGS) {
-        printf("\n[Error] Inventory is full!\n");
-        return;
-    }
+MinGW / MSVC (for Windows)
 
-    struct Drug *newDrug = &drugs[*count];
+Compilation & Execution
 
-    printf("\nEnter Drug ID: ");
-    scanf("%d", &newDrug->id);
-    printf("Enter Drug Name: ");
-    scanf("%s", newDrug->name);
-    printf("Enter Expiry Date (YYYY MM DD): ");
-    scanf("%d %d %d", &newDrug->expYear, &newDrug->expMonth, &newDrug->expDay);
-    printf("Enter Price ($): ");
-    scanf("%f", &newDrug->price);
-    printf("Enter Initial Stock Quantity: ");
-    scanf("%d", &newDrug->stock);
+Save the source code as pharmacy_system.c.
 
-    (*count)++;
-    printf("\n[Success] Drug added successfully!\n");
-}
+Open your terminal and navigate to the project directory.
 
-// Function to display inventory using pointer traversal
-void displayInventory(const struct Drug *drugs, int count) {
-    if (count == 0) {
-        printf("\n[Info] Inventory is empty.\n");
-        return;
-    }
+Compile the program with warning flags enabled:
 
-    printf("\n-----------------------------------------------------------------\n");
-    printf("%-5s | %-20s | %-12s | %-8s | %-6s\n", "ID", "Name", "Expiry Date", "Price", "Stock");
-    printf("-----------------------------------------------------------------\n");
-    
-    for (int i = 0; i < count; i++) {
-        printf("%-5d | %-20s | %04d-%02d-%02d   | $%-7.2f | %-6d\n", 
-               (drugs + i)->id, 
-               (drugs + i)->name, 
-               (drugs + i)->expYear, 
-               (drugs + i)->expMonth, 
-               (drugs + i)->expDay, 
-               (drugs + i)->price, 
-               (drugs + i)->stock);
-    }
-    printf("-----------------------------------------------------------------\n");
-}
+gcc -Wall -Wextra pharmacy_system.c -o pharmacy_system
 
-// Function to check and alert expired products
-void checkExpiry(const struct Drug *drugs, int count, int curYear, int curMonth, int curDay) {
-    if (count == 0) {
-        printf("\n[Info] No drugs in inventory to check.\n");
-        return;
-    }
 
-    int expiredCount = 0;
-    printf("\n--- EXPIRY ALERTS ---\n");
-    
-    for (int i = 0; i < count; i++) {
-        const struct Drug *d = drugs + i;
-        int isExpired = 0;
+Run the executable:
 
-        if (d->expYear < curYear) {
-            isExpired = 1;
-        } else if (d->expYear == curYear && d->expMonth < curMonth) {
-            isExpired = 1;
-        } else if (d->expYear == curYear && d->expMonth == curMonth && d->expDay < curDay) {
-            isExpired = 1;
-        }
+Linux / macOS:
 
-        if (isExpired) {
-            printf("[ALERT] Drug ID: %d (%s) expired on %04d-%02d-%02d! Remove from shelf.\n",
-                   d->id, d->name, d->expYear, d->expMonth, d->expDay);
-            expiredCount++;
-        }
-    }
+./pharmacy_system
 
-    if (expiredCount == 0) {
-        printf("[Info] All drugs are within their valid shelf life.\n");
-    }
-}
 
-// Function to dynamically restock a drug using pointers for real-time updates
-void restockDrug(struct Drug *drugs, int count) {
-    if (count == 0) {
-        printf("\n[Info] Inventory is empty.\n");
-        return;
-    }
+Windows (Command Prompt / PowerShell):
 
-    int targetId, addQty, found = 0;
-    printf("\nEnter Drug ID to restock: ");
-    scanf("%d", &targetId);
+pharmacy_system.exe
 
-    for (int i = 0; i < count; i++) {
-        struct Drug *d = (drugs + i);
-        if (d->id == targetId) {
-            printf("Current Stock for %s: %d\n", d->name, d->stock);
-            printf("Enter quantity to add: ");
-            scanf("%d", &addQty);
 
-            if (addQty > 0) {
-                d->stock += addQty; // Real-time pointer update
-                printf("\n[Success] Stock updated! New stock for %s is %d.\n", d->name, d->stock);
-            } else {
-                printf("\n[Error] Invalid quantity.\n");
-            }
-            found = 1;
-            break;
-        }
-    }
+💻 Usage & Sample Output
 
-    if (!found) {
-        printf("\n[Error] Drug with ID %d not found in inventory.\n", targetId);
-    }
-}
+Main Menu
+
+=========================================
+    HOSPITAL PHARMACY STOCK SYSTEM       
+=========================================
+1. Add New Drug
+2. Display All Inventory
+3. Check for Expired Products
+4. Restock Drug (Dynamic Update)
+5. Exit
+Enter your choice:
+
+
+Example Workflow
+
+1. Viewing Inventory (Option 2):
+
+-----------------------------------------------------------------
+ID    | Name                 | Expiry Date  | Price    | Stock 
+-----------------------------------------------------------------
+101   | Paracetamol          | 2027-08-15   | $4.50    | 250   
+102   | Amoxicillin          | 2026-05-10   | $12.00   | 80    
+-----------------------------------------------------------------
+
+
+2. Checking Expired Products (Option 3):
+
+--- EXPIRY ALERTS ---
+[ALERT] Drug ID: 102 (Amoxicillin) expired on 2026-05-10! Remove from shelf.
+
+
+3. Restocking a Medication (Option 4):
+
+Enter Drug ID to restock: 101
+Current Stock for Paracetamol: 250
+Enter quantity to add: 50
+
+[Success] Stock updated! New stock for Paracetamol is 300.
+
+
+⚠️ Input Guidelines & Limitations
+
+No Spaces in Drug Names: Input is read using scanf("%s", ...), which stops at whitespace. Use underscores or hyphens for multi-word names (e.g., Vitamin_C or Ibuprofen-400mg).
+
+Date Format: Enter expiration dates separated by spaces in YYYY MM DD format (e.g., 2027 11 30).
+
+Simulated System Date: The reference date in main() is currently hardcoded to 2026-10-27 for deterministic testing of the expiry alert logic.
+
+Volatile Memory: Data is stored in RAM during runtime and resets when the program exits.
+
+🔮 Roadmap & Future Enhancements
+
+[ ] Persistent File Storage: Implement binary or CSV file I/O (fopen, fread, fwrite) to save and load inventory across sessions.
+
+[ ] Real-Time System Clock: Integrate <time.h> (time() and localtime()) to automatically fetch the host machine's current date.
+
+[ ] Prescription Dispensing: Add a dispenseDrug() feature to deduct stock when medications are issued to patients.
+
+[ ] Dynamic Capacity: Replace the fixed MAX_DRUGS array with dynamic heap allocation (malloc / realloc).
+
+[ ] Safe String Input: Switch to fgets() with input buffer clearing to allow spaces in medication names.
